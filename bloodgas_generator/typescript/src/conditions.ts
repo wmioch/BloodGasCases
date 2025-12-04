@@ -19,12 +19,12 @@ export const CONDITION_EFFECTS: Record<ClinicalCondition, ConditionEffect> = {
   [ClinicalCondition.COPD_EXACERBATION]: {
     primaryDisorder: Disorder.RESPIRATORY_ACIDOSIS,
     phRange: [7.25, 7.35, 7.42],
-    pco2Effect: [15, 40],
+    pco2Effect: [5, 20],  // Reduced for realistic room air PO2
     hco3Effect: [4, 12],
     po2Effect: [45, 65],
     aaGradientElevated: true,
-    aaGradientRange: [25.0, 50.0],  // V/Q mismatch causes elevated A-a gradient
-    shuntFractionRange: [0.05, 0.15],  // Small shunt component
+    aaGradientRange: [15.0, 32.0],  // Reduced from (25,50) for realistic PO2
+    shuntFractionRange: [0.02, 0.08],  // Reduced - allows good O2 response
     anionGapElevated: false,
     typicalAnionGap: [8, 12],
     sodiumEffect: [-2, 2],
@@ -48,7 +48,7 @@ export const CONDITION_EFFECTS: Record<ClinicalCondition, ConditionEffect> = {
   [ClinicalCondition.OPIOID_OVERDOSE]: {
     primaryDisorder: Disorder.RESPIRATORY_ACIDOSIS,
     phRange: [7.15, 7.25, 7.35],
-    pco2Effect: [20, 50],
+    pco2Effect: [15, 40],  // Reduced from (20,50) for realistic PO2
     hco3Effect: [0, 3],
     po2Effect: [40, 65],
     aaGradientElevated: false,
@@ -139,8 +139,8 @@ export const CONDITION_EFFECTS: Record<ClinicalCondition, ConditionEffect> = {
     hco3Effect: [-2, 4],
     po2Effect: [40, 70],
     aaGradientElevated: true,
-    aaGradientRange: [35.0, 60.0],  // Very elevated A-a gradient
-    shuntFractionRange: [0.20, 0.45],  // Significant shunt - doesn't respond well to O2
+    aaGradientRange: [30.0, 55.0],  // Adjusted for realism
+    shuntFractionRange: [0.28, 0.45],  // Large shunt - poor O2 response
     anionGapElevated: false,
     typicalAnionGap: [8, 12],
     sodiumEffect: [-3, 3],
@@ -169,7 +169,7 @@ export const CONDITION_EFFECTS: Record<ClinicalCondition, ConditionEffect> = {
     po2Effect: [55, 80],
     aaGradientElevated: true,
     aaGradientRange: [20.0, 40.0],  // V/Q mismatch in consolidated lung
-    shuntFractionRange: [0.05, 0.15],  // Some shunt through consolidated areas
+    shuntFractionRange: [0.03, 0.12],  // Small shunt - responds well to O2
     anionGapElevated: false,
     typicalAnionGap: [8, 12],
     sodiumEffect: [-3, 3],

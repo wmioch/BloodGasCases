@@ -24,12 +24,12 @@ CONDITION_EFFECTS: Dict[ClinicalCondition, ConditionEffect] = {
     ClinicalCondition.COPD_EXACERBATION: ConditionEffect(
         primary_disorder=Disorder.RESPIRATORY_ACIDOSIS,
         ph_range=(7.25, 7.35, 7.42),  # Often chronic, partially compensated
-        pco2_effect=(15, 40),  # Elevated pCO2
+        pco2_effect=(5, 20),  # Elevated pCO2 - moderate range to maintain realistic room air PO2
         hco3_effect=(4, 12),  # Chronic compensation
         po2_effect=(45, 65),  # Hypoxemic on room air (reference only)
         aa_gradient_elevated=True,
-        aa_gradient_range=(25.0, 50.0),  # V/Q mismatch causes elevated A-a gradient
-        shunt_fraction_range=(0.05, 0.15),  # Small shunt component
+        aa_gradient_range=(15.0, 32.0),  # V/Q mismatch - reduced from (25,50) for realistic PO2
+        shunt_fraction_range=(0.02, 0.08),  # Small shunt - allows good O2 response
         anion_gap_elevated=False,
         typical_anion_gap=(8, 12),
         potassium_effect=(-0.3, 0.3),
@@ -40,7 +40,7 @@ CONDITION_EFFECTS: Dict[ClinicalCondition, ConditionEffect] = {
             "COPD patients often have chronic CO2 retention with compensatory elevated HCO3",
             "Acute exacerbation causes further pCO2 rise without immediate HCO3 compensation",
             "Look for baseline ABGs to distinguish acute vs chronic changes",
-            "Hypoxemia due to V/Q mismatch - A-a gradient elevated",
+            "Hypoxemia due to V/Q mismatch - A-a gradient elevated but responds well to O2",
         ]
     ),
     
@@ -93,15 +93,15 @@ CONDITION_EFFECTS: Dict[ClinicalCondition, ConditionEffect] = {
         hco3_effect=(-2, 4),
         po2_effect=(40, 70),  # Severe hypoxemia on room air (reference only)
         aa_gradient_elevated=True,
-        aa_gradient_range=(35.0, 60.0),  # Very elevated A-a gradient
-        shunt_fraction_range=(0.20, 0.45),  # Significant shunt - doesn't respond well to O2
+        aa_gradient_range=(30.0, 55.0),  # Very elevated A-a gradient - adjusted for realism
+        shunt_fraction_range=(0.28, 0.45),  # Large shunt - poor response to O2 alone
         anion_gap_elevated=False,
         lactate_effect=(2.0, 8.0),  # Often associated with sepsis/shock
         description="Acute respiratory distress syndrome",
         teaching_points=[
             "Defined by P/F ratio: Mild 200-300, Moderate 100-200, Severe <100",
             "Bilateral infiltrates on imaging required for diagnosis",
-            "Hypoxemia refractory to oxygen due to shunt physiology",
+            "Hypoxemia refractory to oxygen due to shunt physiology (28-45% shunt)",
             "May require permissive hypercapnia in lung-protective ventilation",
         ]
     ),
@@ -114,7 +114,7 @@ CONDITION_EFFECTS: Dict[ClinicalCondition, ConditionEffect] = {
         po2_effect=(55, 80),  # Room air baseline (reference only)
         aa_gradient_elevated=True,
         aa_gradient_range=(20.0, 40.0),  # V/Q mismatch in consolidated lung
-        shunt_fraction_range=(0.05, 0.15),  # Some shunt through consolidated areas
+        shunt_fraction_range=(0.03, 0.12),  # Small shunt - responds well to O2
         anion_gap_elevated=False,
         lactate_effect=(1.0, 4.0),
         description="Community or hospital-acquired pneumonia",
@@ -129,7 +129,7 @@ CONDITION_EFFECTS: Dict[ClinicalCondition, ConditionEffect] = {
     ClinicalCondition.OPIOID_OVERDOSE: ConditionEffect(
         primary_disorder=Disorder.RESPIRATORY_ACIDOSIS,
         ph_range=(7.15, 7.25, 7.35),
-        pco2_effect=(20, 50),  # Significant hypoventilation
+        pco2_effect=(15, 40),  # Significant hypoventilation - adjusted for realistic PO2
         hco3_effect=(0, 3),  # Acute - minimal compensation
         po2_effect=(40, 65),  # Hypoxemia on room air from hypoventilation (reference only)
         aa_gradient_elevated=False,  # Key! Normal A-a gradient
@@ -143,7 +143,7 @@ CONDITION_EFFECTS: Dict[ClinicalCondition, ConditionEffect] = {
         description="Opioid-induced respiratory depression",
         teaching_points=[
             "Classic pure respiratory acidosis with NORMAL A-a gradient",
-            "Hypoxemia corrects with oxygen (no V/Q mismatch)",
+            "Hypoxemia corrects EXCELLENTLY with oxygen (no V/Q mismatch, no shunt)",
             "Blocks respiratory compensation for any metabolic acidosis present",
             "Calculate expected pO2: PAO2 - A-a gradient (should be normal A-a)",
         ]

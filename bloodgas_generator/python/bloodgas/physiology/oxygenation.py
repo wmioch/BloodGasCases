@@ -289,7 +289,7 @@ class OxygenationEngine:
             pao2 = pao2 * (1 - shunt_fraction) + venous_po2 * shunt_fraction
         
         # Ensure PaO2 is physiologically possible
-        pao2 = max(pao2, 20)  # Floor at 20 mmHg (severe hypoxemia)
+        pao2 = max(pao2, 30)  # Floor at 30 mmHg (near-death severe hypoxemia)
         
         # Calculate SaO2
         sao2 = cls.calculate_sao2(pao2, ph, temperature, paco2)
