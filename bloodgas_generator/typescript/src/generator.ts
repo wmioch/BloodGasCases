@@ -146,7 +146,7 @@ function generateFromDisorder(
     po2 = po2 * (1 - shuntFrac) + venousPo2 * shuntFrac;
   }
   
-  po2 = Math.max(po2, 40);
+  po2 = Math.max(po2, 30);  // Floor at 30 mmHg (near-death severe hypoxemia)
   
   // Generate electrolytes
   let sodium = 140;
@@ -333,7 +333,7 @@ function generateFromScenarios(
   }
   
   // Ensure PO2 is physiologically possible
-  po2 = Math.max(po2, 25);  // Floor at severe hypoxemia
+  po2 = Math.max(po2, 30);  // Floor at 30 mmHg (near-death severe hypoxemia)
   
   // Electrolytes
   let sodium = 140 + sodiumDelta;
