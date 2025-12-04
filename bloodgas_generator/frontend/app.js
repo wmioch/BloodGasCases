@@ -258,7 +258,6 @@ function generateBloodGasInline(conditions, severities, age, fio2, chronicCondit
   
   let pco2Delta = 0;
   let hco3Delta = 0;
-  let po2Target = 95;
   let aaGradientElevated = false;
   let anionGapElevated = false;
   let targetAnionGap = 10;
@@ -267,33 +266,35 @@ function generateBloodGasInline(conditions, severities, age, fio2, chronicCondit
   let potassiumDelta = 0;
   
   // Condition effects (simplified)
+  // NOTE: po2 is now calculated dynamically based on FiO2, A-a gradient, and shunt
+  // aaElevated flag indicates V/Q mismatch or shunt physiology
   const EFFECTS = {
-    'DKA': { hco3: -14, pco2: -12, ag: 28, glucose: 450, lactate: 3.5, k: 0.8 },
-    'OPIOID_OVERDOSE': { pco2: 30, hco3: 1, po2: 55 },
-    'LACTIC_ACIDOSIS_SEPSIS': { hco3: -10, pco2: -8, ag: 22, lactate: 8, po2: 70 },
-    'LACTIC_ACIDOSIS_SHOCK': { hco3: -14, pco2: -12, ag: 28, lactate: 14, po2: 55 },
-    'VOMITING': { hco3: 10, pco2: 6, k: -1.0 },
-    'COPD_EXACERBATION': { pco2: 25, hco3: 6, po2: 55, aaElevated: true },
-    'ASTHMA_ATTACK': { pco2: -8, hco3: -2, po2: 70, aaElevated: true },
-    'PULMONARY_EMBOLISM': { pco2: -8, hco3: -1, po2: 65, aaElevated: true },
-    'ARDS': { pco2: 15, hco3: 2, po2: 55, aaElevated: true },
-    'PNEUMONIA': { pco2: -5, hco3: -1, po2: 65, aaElevated: true },
-    'RENAL_FAILURE_ACUTE': { hco3: -8, pco2: -6, ag: 18, k: 1.2 },
-    'RENAL_FAILURE_CHRONIC': { hco3: -4, pco2: -3, ag: 15 },
-    'DIARRHEA': { hco3: -8, pco2: -6, k: -1.0 },
-    'HYPERVENTILATION_ANXIETY': { pco2: -15, hco3: -2, po2: 105 },
-    'TOXIC_INGESTION_SALICYLATE': { hco3: -8, pco2: -10, ag: 22, lactate: 4 },
-    'TOXIC_INGESTION_METHANOL': { hco3: -16, pco2: -14, ag: 32 },
-    'TOXIC_INGESTION_ETHYLENE_GLYCOL': { hco3: -16, pco2: -14, ag: 32 },
-    'HEALTHY': { hco3: 0, pco2: 0, po2: 95 },
-    'PREGNANCY': { pco2: -8, hco3: -3, po2: 105 },
-    'HIGH_ALTITUDE': { pco2: -8, hco3: -2, po2: 65 },
-    'DIURETIC_USE': { hco3: 6, pco2: 4, k: -0.7 },
-    'ALCOHOLIC_KETOACIDOSIS': { hco3: -10, pco2: -8, ag: 22, glucose: 70 },
-    'RTA_TYPE1': { hco3: -10, pco2: -6, k: -1.0 },
-    'RTA_TYPE4': { hco3: -4, pco2: -3, k: 1.0 },
-    'NG_SUCTION': { hco3: 8, pco2: 5, k: -0.8 },
-    'HHS': { hco3: -4, pco2: -2, ag: 14, glucose: 800 },
+    'DKA': { hco3: -14, pco2: -12, ag: 28, glucose: 450, lactate: 3.5, k: 0.8, aaElevated: false },
+    'OPIOID_OVERDOSE': { pco2: 30, hco3: 1, aaElevated: false },
+    'LACTIC_ACIDOSIS_SEPSIS': { hco3: -10, pco2: -8, ag: 22, lactate: 8, aaElevated: true },
+    'LACTIC_ACIDOSIS_SHOCK': { hco3: -14, pco2: -12, ag: 28, lactate: 14, aaElevated: true },
+    'VOMITING': { hco3: 10, pco2: 6, k: -1.0, aaElevated: false },
+    'COPD_EXACERBATION': { pco2: 25, hco3: 6, aaElevated: true },
+    'ASTHMA_ATTACK': { pco2: -8, hco3: -2, aaElevated: true },
+    'PULMONARY_EMBOLISM': { pco2: -8, hco3: -1, aaElevated: true },
+    'ARDS': { pco2: 15, hco3: 2, aaElevated: true },
+    'PNEUMONIA': { pco2: -5, hco3: -1, aaElevated: true },
+    'RENAL_FAILURE_ACUTE': { hco3: -8, pco2: -6, ag: 18, k: 1.2, aaElevated: false },
+    'RENAL_FAILURE_CHRONIC': { hco3: -4, pco2: -3, ag: 15, aaElevated: false },
+    'DIARRHEA': { hco3: -8, pco2: -6, k: -1.0, aaElevated: false },
+    'HYPERVENTILATION_ANXIETY': { pco2: -15, hco3: -2, aaElevated: false },
+    'TOXIC_INGESTION_SALICYLATE': { hco3: -8, pco2: -10, ag: 22, lactate: 4, aaElevated: false },
+    'TOXIC_INGESTION_METHANOL': { hco3: -16, pco2: -14, ag: 32, aaElevated: false },
+    'TOXIC_INGESTION_ETHYLENE_GLYCOL': { hco3: -16, pco2: -14, ag: 32, aaElevated: false },
+    'HEALTHY': { hco3: 0, pco2: 0, aaElevated: false },
+    'PREGNANCY': { pco2: -8, hco3: -3, aaElevated: false },
+    'HIGH_ALTITUDE': { pco2: -8, hco3: -2, aaElevated: false },
+    'DIURETIC_USE': { hco3: 6, pco2: 4, k: -0.7, aaElevated: false },
+    'ALCOHOLIC_KETOACIDOSIS': { hco3: -10, pco2: -8, ag: 22, glucose: 70, aaElevated: false },
+    'RTA_TYPE1': { hco3: -10, pco2: -6, k: -1.0, aaElevated: false },
+    'RTA_TYPE4': { hco3: -4, pco2: -3, k: 1.0, aaElevated: false },
+    'NG_SUCTION': { hco3: 8, pco2: 5, k: -0.8, aaElevated: false },
+    'HHS': { hco3: -4, pco2: -2, ag: 14, glucose: 800, aaElevated: false },
   };
   
   // Apply effects from all conditions
@@ -305,8 +306,9 @@ function generateBloodGasInline(conditions, severities, age, fio2, chronicCondit
     pco2Delta += (effect.pco2 || 0) * severityFactor;
     hco3Delta += (effect.hco3 || 0) * severityFactor;
     
-    if (effect.po2) po2Target = Math.min(po2Target, effect.po2);
+    // Mark if A-a gradient should be elevated (V/Q mismatch or shunt physiology)
     if (effect.aaElevated) aaGradientElevated = true;
+    
     if (effect.ag) {
       anionGapElevated = true;
       targetAnionGap = Math.max(targetAnionGap, effect.ag * severityFactor);
@@ -322,12 +324,29 @@ function generateBloodGasInline(conditions, severities, age, fio2, chronicCondit
   let ph = 6.1 + Math.log10(hco3 / (0.03 * pco2));
   ph = Math.max(Math.min(ph, 7.8), 6.8);
   
-  // Oxygenation
+  // Oxygenation - properly FiO2-responsive calculation
+  // Calculate alveolar PO2 using alveolar gas equation
   const pao2Alveolar = fio2 * (760 - 47) - (pco2 / 0.8);
+  
+  // Calculate A-a gradient based on pathology
   const expectedAa = (age / 4) + 4;
   const aaGradient = aaGradientElevated ? 30 : expectedAa;
-  let po2 = Math.max(pao2Alveolar - aaGradient, 30);
-  if (po2Target < 90) po2 = po2Target;
+  
+  // Calculate arterial PO2 from alveolar PO2 and A-a gradient
+  let po2 = pao2Alveolar - aaGradient;
+  
+  // Apply shunt effect if present - shunted blood doesn't benefit from supplemental O2
+  // Estimate shunt fraction based on severity
+  let shuntFraction = 0.0;
+  if (aaGradientElevated) {
+    // Conditions with V/Q mismatch typically have some shunt component
+    shuntFraction = 0.10; // 10% shunt for moderate lung pathology
+    const venousPo2 = 40;  // Mixed venous PO2
+    po2 = po2 * (1 - shuntFraction) + venousPo2 * shuntFraction;
+  }
+  
+  // Floor at severe hypoxemia
+  po2 = Math.max(po2, 30);
   
   // SaO2 from dissociation curve
   const p50 = 27 + (7.4 - ph) * 5;

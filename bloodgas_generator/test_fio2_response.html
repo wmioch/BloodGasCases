@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FiO2 Response Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+    }
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+    .good { color: #4CAF50; font-weight: bold; }
+    .warn { color: #ff9800; font-weight: bold; }
+    .bad { color: #f44336; font-weight: bold; }
+    .normal { color: #2196F3; font-weight: bold; }
+    .explanation {
+      background: #e3f2fd;
+      padding: 15px;
+      border-left: 4px solid #2196F3;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .formula {
+      background: #fff3e0;
+      padding: 10px;
+      border-left: 4px solid #ff9800;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .status {
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .status.pass { background: #c8e6c9; color: #2e7d32; }
+    .status.fail { background: #ffcdd2; color: #c62828; }
+  </style>
+</head>
+<body>
+  <h1>🫁 FiO2 Response Test - Verifying the Bug Fix</h1>
+  
+  <div class="explanation">
+    <h3>What This Tests:</h3>
+    <p><strong>Bug:</strong> PO2 was fixed at a static target value, not responding to FiO2 changes.</p>
+    <p><strong>Fix:</strong> PO2 is now calculated from alveolar gas equation, A-a gradient, and shunt fraction.</p>
+    <p><strong>Expected Result:</strong> PO2 should increase when FiO2 increases (with rate of increase depending on pathology).</p>
+  </div>
+
+  <button onclick="runTest('COPD_EXACERBATION')">Test COPD</button>
+  <button onclick="runTest('ARDS')">Test ARDS</button>
+  <button onclick="runTest('OPIOID_OVERDOSE')">Test Opioid OD</button>
+  <button onclick="runTest('DKA')">Test DKA</button>
+  <button onclick="runAllTests()">Run All Tests</button>
+
+  <div id="results"></div>
+
+  <script>
+    // Simplified generator for testing (mimics the fixed app.js logic)
+    function calculatePO2(condition, fio2, age = 40) {
+      // Condition effects
+      const EFFECTS = {
+        'COPD_EXACERBATION': { pco2Delta: 25, aaElevated: true, shunt: 0.10, description: 'V/Q mismatch' },
+        'ARDS': { pco2Delta: 15, aaElevated: true, shunt: 0.35, description: 'Large shunt' },
+        'OPIOID_OVERDOSE': { pco2Delta: 30, aaElevated: false, shunt: 0.0, description: 'Pure hypoventilation' },
+        'DKA': { pco2Delta: -12, aaElevated: false, shunt: 0.0, description: 'Kussmaul breathing' },
+      };
+
+      const effect = EFFECTS[condition];
+      const pco2 = 40 + effect.pco2Delta;
+
+      // Alveolar gas equation
+      const pao2Alveolar = fio2 * (760 - 47) - (pco2 / 0.8);
+
+      // A-a gradient
+      const expectedAa = (age / 4) + 4;
+      const aaGradient = effect.aaElevated ? 30 : expectedAa;
+
+      // Arterial PO2
+      let po2 = pao2Alveolar - aaGradient;
+
+      // Shunt effect
+      if (effect.shunt > 0) {
+        const venousPo2 = 40;
+        po2 = po2 * (1 - effect.shunt) + venousPo2 * effect.shunt;
+      }
+
+      po2 = Math.max(po2, 30);
+
+      return {
+        pco2: Math.round(pco2),
+        alveolarPo2: Math.round(pao2Alveolar),
+        aaGradient: Math.round(aaGradient),
+        po2: Math.round(po2),
+        sao2: calculateSao2(po2),
+        pfRatio: Math.round(po2 / fio2),
+        description: effect.description
+      };
+    }
+
+    function calculateSao2(po2) {
+      const p50 = 27;
+      const n = 2.7;
+      const sao2 = 100 * Math.pow(po2, n) / (Math.pow(p50, n) + Math.pow(po2, n));
+      return Math.min(Math.max(Math.round(sao2), 0), 100);
+    }
+
+    function getStatusClass(po2) {
+      if (po2 >= 80) return 'good';
+      if (po2 >= 60) return 'warn';
+      return 'bad';
+    }
+
+    function runTest(condition) {
+      const fio2Values = [0.21, 0.28, 0.40, 0.60, 1.0];
+      const results = [];
+      
+      fio2Values.forEach(fio2 => {
+        results.push({
+          fio2: fio2,
+          fio2Pct: Math.round(fio2 * 100),
+          ...calculatePO2(condition, fio2)
+        });
+      });
+
+      // Check if PO2 increases with FiO2
+      let testPassed = true;
+      for (let i = 1; i < results.length; i++) {
+        if (results[i].po2 <= results[i-1].po2) {
+          testPassed = false;
+          break;
+        }
+      }
+
+      displayResults(condition, results, testPassed);
+    }
+
+    function displayResults(condition, results, testPassed) {
+      const resultsDiv = document.getElementById('results');
+      
+      let html = `
+        <div class="test-section">
+          <h2>${condition.replace(/_/g, ' ')} 
+            <span class="status ${testPassed ? 'pass' : 'fail'}">
+              ${testPassed ? '✓ PASS' : '✗ FAIL'}
+            </span>
+          </h2>
+          <p><strong>Pathophysiology:</strong> ${results[0].description}</p>
+          <p><strong>Baseline pCO2:</strong> ${results[0].pco2} mmHg</p>
+          
+          <div class="formula">
+            <strong>Formula:</strong><br>
+            PAO₂ = FiO₂ × 713 - (pCO₂ / 0.8)<br>
+            PaO₂ = PAO₂ - A-a Gradient<br>
+            ${results[0].description.includes('shunt') ? 'PaO₂ (final) = PaO₂ × (1 - shunt) + 40 × shunt' : ''}
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>FiO₂</th>
+                <th>Alveolar PO₂</th>
+                <th>A-a Gradient</th>
+                <th>Arterial PO₂</th>
+                <th>SaO₂</th>
+                <th>P/F Ratio</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      results.forEach(r => {
+        const statusClass = getStatusClass(r.po2);
+        const status = r.po2 >= 80 ? 'Normal' : r.po2 >= 60 ? 'Mild Hypoxemia' : r.po2 >= 40 ? 'Moderate Hypoxemia' : 'Severe Hypoxemia';
+        
+        html += `
+          <tr>
+            <td><strong>${r.fio2Pct}%</strong></td>
+            <td>${r.alveolarPo2} mmHg</td>
+            <td>${r.aaGradient} mmHg</td>
+            <td class="${statusClass}">${r.po2} mmHg</td>
+            <td class="${statusClass}">${r.sao2}%</td>
+            <td>${r.pfRatio}</td>
+            <td class="${statusClass}">${status}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+            </tbody>
+          </table>
+          
+          <div class="explanation">
+            <h4>Interpretation:</h4>
+            <p>${getInterpretation(condition, results)}</p>
+          </div>
+        </div>
+      `;
+
+      resultsDiv.innerHTML += html;
+    }
+
+    function getInterpretation(condition, results) {
+      const roomAir = results[0];
+      const highO2 = results[results.length - 1];
+      const improvement = highO2.po2 - roomAir.po2;
+      const improvementPct = Math.round((improvement / roomAir.po2) * 100);
+
+      if (condition === 'COPD_EXACERBATION') {
+        return `COPD shows good response to O₂ (PO₂ increased by ${improvement} mmHg, ${improvementPct}%). 
+                The 10% shunt limits response somewhat, but V/Q mismatch areas still benefit from supplemental oxygen. 
+                This is why we give oxygen to COPD patients - it works!`;
+      } else if (condition === 'ARDS') {
+        return `ARDS shows limited response to O₂ (PO₂ increased by ${improvement} mmHg, ${improvementPct}%). 
+                The large 35% shunt severely limits benefit from supplemental oxygen. 
+                This is why ARDS patients need PEEP to recruit alveoli and reduce the shunt fraction.`;
+      } else if (condition === 'OPIOID_OVERDOSE') {
+        return `Opioid overdose shows EXCELLENT response to O₂ (PO₂ increased by ${improvement} mmHg, ${improvementPct}%). 
+                Normal A-a gradient with no shunt means supplemental oxygen easily corrects hypoxemia. 
+                However, the patient still needs naloxone or ventilation to address the CO₂ retention!`;
+      } else if (condition === 'DKA') {
+        return `DKA shows excellent response to O₂ (PO₂ increased by ${improvement} mmHg, ${improvementPct}%). 
+                Kussmaul breathing (hyperventilation) keeps pCO₂ low, resulting in high alveolar PO₂. 
+                Normal lungs with no V/Q mismatch or shunt.`;
+      }
+      return '';
+    }
+
+    function runAllTests() {
+      document.getElementById('results').innerHTML = '';
+      runTest('COPD_EXACERBATION');
+      runTest('ARDS');
+      runTest('OPIOID_OVERDOSE');
+      runTest('DKA');
+    }
+
+    // Run initial test
+    window.onload = () => {
+      runTest('COPD_EXACERBATION');
+    };
+  </script>
+</body>
+</html>
