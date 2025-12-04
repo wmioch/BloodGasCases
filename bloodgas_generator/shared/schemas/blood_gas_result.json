@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bloodgas-generator.dev/schemas/blood_gas_result.json",
+  "title": "BloodGasResult",
+  "description": "Complete blood gas result with all parameters and interpretation",
+  "type": "object",
+  "required": [
+    "ph", "pco2", "po2", "hco3", "base_excess", "sao2",
+    "fio2", "pao2_fio2_ratio", "aa_gradient", "expected_aa_gradient",
+    "sodium", "potassium", "chloride", "glucose",
+    "anion_gap", "corrected_anion_gap", "delta_gap", "lactate", "hemoglobin"
+  ],
+  "properties": {
+    "ph": {
+      "type": "number",
+      "description": "Arterial pH",
+      "minimum": 6.5,
+      "maximum": 8.0
+    },
+    "pco2": {
+      "type": "number",
+      "description": "Partial pressure of CO2 in mmHg",
+      "minimum": 10,
+      "maximum": 150
+    },
+    "po2": {
+      "type": "number",
+      "description": "Partial pressure of O2 in mmHg",
+      "minimum": 20,
+      "maximum": 700
+    },
+    "hco3": {
+      "type": "number",
+      "description": "Bicarbonate in mEq/L",
+      "minimum": 2,
+      "maximum": 60
+    },
+    "base_excess": {
+      "type": "number",
+      "description": "Base excess in mEq/L",
+      "minimum": -30,
+      "maximum": 30
+    },
+    "sao2": {
+      "type": "number",
+      "description": "Oxygen saturation percentage",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "fio2": {
+      "type": "number",
+      "description": "Fraction of inspired oxygen (0.21-1.0)",
+      "minimum": 0.21,
+      "maximum": 1.0
+    },
+    "pao2_fio2_ratio": {
+      "type": "number",
+      "description": "P/F ratio for ARDS classification",
+      "minimum": 0
+    },
+    "aa_gradient": {
+      "type": "number",
+      "description": "Alveolar-arterial gradient in mmHg",
+      "minimum": 0
+    },
+    "expected_aa_gradient": {
+      "type": "number",
+      "description": "Age-adjusted expected A-a gradient"
+    },
+    "sodium": {
+      "type": "number",
+      "description": "Serum sodium in mEq/L",
+      "minimum": 100,
+      "maximum": 180
+    },
+    "potassium": {
+      "type": "number",
+      "description": "Serum potassium in mEq/L",
+      "minimum": 1.5,
+      "maximum": 10
+    },
+    "chloride": {
+      "type": "number",
+      "description": "Serum chloride in mEq/L",
+      "minimum": 70,
+      "maximum": 140
+    },
+    "glucose": {
+      "type": "number",
+      "description": "Blood glucose in mg/dL",
+      "minimum": 10,
+      "maximum": 2000
+    },
+    "anion_gap": {
+      "type": "number",
+      "description": "Anion gap in mEq/L"
+    },
+    "corrected_anion_gap": {
+      "type": "number",
+      "description": "Albumin-corrected anion gap"
+    },
+    "delta_gap": {
+      "type": "number",
+      "description": "Delta gap for mixed disorder analysis"
+    },
+    "lactate": {
+      "type": "number",
+      "description": "Blood lactate in mmol/L",
+      "minimum": 0,
+      "maximum": 30
+    },
+    "hemoglobin": {
+      "type": "number",
+      "description": "Hemoglobin in g/dL",
+      "minimum": 2,
+      "maximum": 25
+    },
+    "albumin": {
+      "type": "number",
+      "description": "Serum albumin in g/dL",
+      "default": 4.0
+    },
+    "interpretation": {
+      "$ref": "#/definitions/ClinicalInterpretation"
+    },
+    "generation_params": {
+      "$ref": "#/definitions/GenerationParams"
+    }
+  },
+  "definitions": {
+    "ClinicalInterpretation": {
+      "type": "object",
+      "required": ["primary_disorder", "primary_disorder_description", "compensation_status", "compensation_description"],
+      "properties": {
+        "primary_disorder": { "type": "string" },
+        "primary_disorder_description": { "type": "string" },
+        "compensation_status": { "type": "string" },
+        "compensation_description": { "type": "string" },
+        "secondary_disorder": { "type": ["string", "null"] },
+        "secondary_disorder_description": { "type": ["string", "null"] },
+        "oxygenation_status": { "type": "string" },
+        "oxygenation_description": { "type": "string" },
+        "anion_gap_status": { "type": "string" },
+        "anion_gap_description": { "type": "string" },
+        "delta_delta_analysis": { "type": ["string", "null"] },
+        "severity": {
+          "type": "string",
+          "enum": ["normal", "mild", "moderate", "severe", "critical"]
+        },
+        "clinical_implications": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "teaching_points": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "generating_conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "GenerationParams": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["disorder", "scenario"]
+        },
+        "primary_disorder": { "type": ["string", "null"] },
+        "secondary_disorder": { "type": ["string", "null"] },
+        "specified_compensation": { "type": ["string", "null"] },
+        "conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "condition_severities": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "patient_age": { "type": ["integer", "null"] },
+        "chronic_conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "fio2": { "type": "number" },
+        "seed": { "type": ["integer", "null"] }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bloodgas-generator.dev/schemas/enums.json",
+  "title": "Blood Gas Generator Enums",
+  "description": "Enumeration definitions for blood gas generation",
+  "definitions": {
+    "Disorder": {
+      "type": "string",
+      "enum": [
+        "NORMAL",
+        "METABOLIC_ACIDOSIS",
+        "METABOLIC_ALKALOSIS",
+        "RESPIRATORY_ACIDOSIS",
+        "RESPIRATORY_ALKALOSIS"
+      ],
+      "description": "Primary acid-base disorder types"
+    },
+    "Severity": {
+      "type": "string",
+      "enum": ["MILD", "MODERATE", "SEVERE"],
+      "description": "Severity levels for disorders and conditions"
+    },
+    "Compensation": {
+      "type": "string",
+      "enum": ["NONE", "PARTIAL", "APPROPRIATE", "EXCESSIVE"],
+      "description": "Compensation status for acid-base disorders"
+    },
+    "Duration": {
+      "type": "string",
+      "enum": ["ACUTE", "SUBACUTE", "CHRONIC"],
+      "description": "Duration of condition affecting compensation"
+    },
+    "ClinicalCondition": {
+      "type": "string",
+      "enum": [
+        "COPD_EXACERBATION",
+        "ASTHMA_ATTACK",
+        "PULMONARY_EMBOLISM",
+        "ARDS",
+        "PNEUMONIA",
+        "OPIOID_OVERDOSE",
+        "HYPERVENTILATION_ANXIETY",
+        "HYPERVENTILATION_PAIN",
+        "NEUROMUSCULAR_WEAKNESS",
+        "DKA",
+        "HHS",
+        "LACTIC_ACIDOSIS_SEPSIS",
+        "LACTIC_ACIDOSIS_SHOCK",
+        "LACTIC_ACIDOSIS_SEIZURE",
+        "RENAL_FAILURE_ACUTE",
+        "RENAL_FAILURE_CHRONIC",
+        "TOXIC_INGESTION_METHANOL",
+        "TOXIC_INGESTION_ETHYLENE_GLYCOL",
+        "TOXIC_INGESTION_SALICYLATE",
+        "STARVATION_KETOSIS",
+        "ALCOHOLIC_KETOACIDOSIS",
+        "DIARRHEA",
+        "RTA_TYPE1",
+        "RTA_TYPE2",
+        "RTA_TYPE4",
+        "SALINE_INFUSION",
+        "VOMITING",
+        "NG_SUCTION",
+        "DIURETIC_USE",
+        "HYPOKALEMIA",
+        "HYPERALDOSTERONISM",
+        "MILK_ALKALI_SYNDROME",
+        "POST_HYPERCAPNIA",
+        "HEALTHY",
+        "PREGNANCY",
+        "HIGH_ALTITUDE"
+      ],
+      "description": "Clinical conditions that drive blood gas abnormalities"
+    },
+    "ChronicCondition": {
+      "type": "string",
+      "enum": [
+        "TYPE1_DIABETES",
+        "TYPE2_DIABETES",
+        "COPD",
+        "CHRONIC_KIDNEY_DISEASE",
+        "HEART_FAILURE",
+        "CIRRHOSIS",
+        "OBESITY_HYPOVENTILATION",
+        "ANEMIA_CHRONIC"
+      ],
+      "description": "Chronic conditions that modify baseline physiology"
+    }
+  }
+}
+
