@@ -193,14 +193,25 @@ function recalculateUnlockedValues() {
   }
   
   // ===== OXYGENATION CALCULATIONS =====
-  // SaO2 from pO2 and pH (using oxygen-hemoglobin dissociation curve)
-  if (!locked.has('sao2')) {
-    v.sao2 = calculateSaO2FromPO2(v.po2, v.ph);
-  }
+  // Priority: SaO2 -> pO2 relationship takes precedence over FiO2 -> pO2
   
-  // If SaO2 is locked but pO2 isn't, calculate pO2 from SaO2
+  // If SaO2 is locked (user-controlled) but pO2 isn't, calculate pO2 from SaO2
   if (locked.has('sao2') && !locked.has('po2')) {
     v.po2 = calculatePO2FromSaO2(v.sao2, v.ph);
+  }
+  // Else if FiO2 is locked (user-controlled) or pCO2 is locked, and pO2 is NOT locked, 
+  // recalculate pO2 using alveolar gas equation
+  else if (!locked.has('po2') && (locked.has('fio2') || locked.has('pco2'))) {
+    const alveolarPo2 = calculateAlveolarPO2(v.fio2, v.pco2);
+    // Assume a reasonable A-a gradient (age-dependent)
+    const aaGradient = (40 / 4) + 4; // Assume age 40, normal gradient
+    v.po2 = alveolarPo2 - aaGradient;
+    v.po2 = Math.max(30, Math.min(600, v.po2)); // Clamp to physiological range
+  }
+  
+  // Always recalculate SaO2 from pO2 if user isn't controlling SaO2
+  if (!locked.has('sao2')) {
+    v.sao2 = calculateSaO2FromPO2(v.po2, v.ph);
   }
   
   // ===== ELECTROLYTE RELATIONSHIPS =====
@@ -261,6 +272,19 @@ function calculatePCO2FromPHandHCO3(ph, hco3) {
 }
 
 // ===== OXYGENATION CALCULATIONS =====
+
+function calculateAlveolarPO2(fio2Percent, pco2) {
+  // Alveolar gas equation: PAO2 = FiO2 * (Patm - PH2O) - PaCO2/RQ
+  const fio2 = fio2Percent / 100;
+  const atmosphericPressure = 760; // mmHg at sea level
+  const waterVaporPressure = 47; // mmHg at 37°C
+  const respiratoryQuotient = 0.8;
+  
+  const pio2 = fio2 * (atmosphericPressure - waterVaporPressure);
+  const pao2 = pio2 - (pco2 / respiratoryQuotient);
+  
+  return pao2;
+}
 
 function calculateSaO2FromPO2(po2, ph) {
   // Oxygen-hemoglobin dissociation curve (Hill equation)
