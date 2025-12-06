@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FiO2 → PaO2 Fix Demonstration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+    }
+    
+    .section-title {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .control-group {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .slider-container {
+      margin-bottom: 20px;
+    }
+    
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .slider-value {
+      color: #667eea;
+      font-weight: 600;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #e0e0e0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .result-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+    }
+    
+    .result-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+    
+    .result-value {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .result-unit {
+      font-size: 18px;
+      opacity: 0.8;
+    }
+    
+    .formula {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      margin-top: 20px;
+      color: #856404;
+    }
+    
+    .formula-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .info-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .info-card-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .info-card-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .success-badge {
+      background: #d4edda;
+      color: #155724;
+      padding: 10px 20px;
+      border-radius: 25px;
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-badge">✓ Fix Applied</div>
+    <h1>FiO2 → PaO2 Relationship Demo</h1>
+    <p class="subtitle">Demonstrating the fix for the FiO2 to PaO2 calculation in the Blood Gas Explorer</p>
+    
+    <div class="section">
+      <div class="section-title">Input Parameters</div>
+      <div class="control-group">
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>FiO2 (Fraction of Inspired O₂)</span>
+            <span class="slider-value"><span id="fio2-display">21</span>%</span>
+          </div>
+          <input type="range" id="fio2-slider" min="21" max="100" value="21" step="1">
+        </div>
+        
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>PaCO₂ (Partial Pressure of CO₂)</span>
+            <span class="slider-value"><span id="pco2-display">40</span> mmHg</span>
+          </div>
+          <input type="range" id="pco2-slider" min="20" max="80" value="40" step="1">
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Calculated PaO₂</div>
+      <div class="result-box">
+        <div class="result-label">Arterial Partial Pressure of Oxygen</div>
+        <div class="result-value" id="pao2-result">95</div>
+        <div class="result-unit">mmHg</div>
+      </div>
+      
+      <div class="formula">
+        <div class="formula-title">Alveolar Gas Equation:</div>
+        <div>PAO₂ = FiO₂ × (P<sub>atm</sub> - P<sub>H₂O</sub>) - PaCO₂/RQ</div>
+        <div style="margin-top: 8px; font-size: 11px;">
+          Where: P<sub>atm</sub> = 760 mmHg, P<sub>H₂O</sub> = 47 mmHg, RQ = 0.8
+        </div>
+        <div style="margin-top: 8px;">
+          PaO₂ = PAO₂ - A-a gradient (assumed ~14 mmHg)
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-label">Alveolar PO₂</div>
+          <div class="info-card-value" id="alveolar-po2">109</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">A-a Gradient</div>
+          <div class="info-card-value">14</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">P/F Ratio</div>
+          <div class="info-card-value" id="pf-ratio">452</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">SaO₂</div>
+          <div class="info-card-value" id="sao2">98%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Calculation functions (same as in explorer.js)
+    function calculateAlveolarPO2(fio2Percent, pco2) {
+      const fio2 = fio2Percent / 100;
+      const atmosphericPressure = 760;
+      const waterVaporPressure = 47;
+      const respiratoryQuotient = 0.8;
+      
+      const pio2 = fio2 * (atmosphericPressure - waterVaporPressure);
+      const pao2 = pio2 - (pco2 / respiratoryQuotient);
+      
+      return pao2;
+    }
+    
+    function calculateSaO2FromPO2(po2, ph = 7.4) {
+      const p50 = 27 + (7.4 - ph) * 5;
+      const hillCoefficient = 2.7;
+      
+      const sao2 = 100 * Math.pow(po2, hillCoefficient) / 
+                   (Math.pow(p50, hillCoefficient) + Math.pow(po2, hillCoefficient));
+      
+      return Math.max(0, Math.min(100, sao2));
+    }
+    
+    function update() {
+      const fio2 = parseFloat(document.getElementById('fio2-slider').value);
+      const pco2 = parseFloat(document.getElementById('pco2-slider').value);
+      
+      // Calculate alveolar PO2
+      const alveolarPo2 = calculateAlveolarPO2(fio2, pco2);
+      
+      // Apply A-a gradient
+      const aaGradient = 14; // Normal gradient
+      const pao2 = Math.max(30, alveolarPo2 - aaGradient);
+      
+      // Calculate SaO2
+      const sao2 = calculateSaO2FromPO2(pao2);
+      
+      // Calculate P/F ratio
+      const pfRatio = pao2 / (fio2 / 100);
+      
+      // Update displays
+      document.getElementById('fio2-display').textContent = fio2;
+      document.getElementById('pco2-display').textContent = pco2;
+      document.getElementById('pao2-result').textContent = Math.round(pao2);
+      document.getElementById('alveolar-po2').textContent = Math.round(alveolarPo2);
+      document.getElementById('pf-ratio').textContent = Math.round(pfRatio);
+      document.getElementById('sao2').textContent = Math.round(sao2);
+    }
+    
+    // Event listeners
+    document.getElementById('fio2-slider').addEventListener('input', update);
+    document.getElementById('pco2-slider').addEventListener('input', update);
+    
+    // Initial calculation
+    update();
+  </script>
+</body>
+</html>
