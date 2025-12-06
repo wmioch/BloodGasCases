@@ -39,29 +39,29 @@
             <div class="instruction-item">
               <div class="instruction-number">1</div>
               <div class="instruction-text">
-                <strong>Start with Normal Values</strong>
-                <p>The explorer begins with a normal healthy blood gas result</p>
+                <strong>Adjust FiO₂</strong>
+                <p>Change the inspired oxygen fraction to see how it affects blood gas values</p>
               </div>
             </div>
             <div class="instruction-item">
               <div class="instruction-number">2</div>
               <div class="instruction-text">
-                <strong>Unlock Parameters</strong>
-                <p>Click the lock icon next to any value to unlock it for editing</p>
+                <strong>Modify Electrolytes</strong>
+                <p>Unlock electrolyte values to explore their effects on acid-base balance</p>
               </div>
             </div>
             <div class="instruction-item">
               <div class="instruction-number">3</div>
               <div class="instruction-text">
-                <strong>Adjust Values</strong>
-                <p>Change unlocked values and watch other parameters update in real-time</p>
+                <strong>Watch Blood Gas Update</strong>
+                <p>Measured ABG values update automatically based on your inputs</p>
               </div>
             </div>
             <div class="instruction-item">
               <div class="instruction-number">4</div>
               <div class="instruction-text">
-                <strong>Explore Relationships</strong>
-                <p>See how physiological relationships affect the complete blood gas</p>
+                <strong>Review Calculated Values</strong>
+                <p>See derived parameters like P/F ratio, anion gap, and A-a gradient</p>
               </div>
             </div>
           </div>
@@ -92,144 +92,41 @@
         </div>
       </section>
 
-      <!-- Blood Gas Values Panel -->
+      <!-- FiO2 Control Panel -->
       <section class="panel explorer-panel">
         <div class="panel-header">
-          <h2>Blood Gas Values</h2>
-          <div class="result-actions">
-            <button class="action-btn" id="copyExplorerBtn" title="Copy to Clipboard">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2"/>
-                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-              </svg>
-            </button>
-          </div>
+          <h2>Oxygen Therapy</h2>
         </div>
         
         <div class="panel-content">
-          <!-- ABG Values -->
           <div class="explorer-section">
-            <h3>Arterial Blood Gas</h3>
-            <div class="explorer-grid">
-              <!-- pH -->
-              <div class="explorer-item" data-param="ph">
-                <div class="explorer-item-header">
-                  <span class="explorer-label">pH</span>
-                  <button class="lock-btn locked" data-param="ph" title="Click to unlock">
-                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 019.9-1"/>
-                    </svg>
-                  </button>
-                </div>
-                <input type="number" class="explorer-input" data-param="ph" value="7.40" step="0.01" min="6.8" max="7.8" readonly>
-                <span class="explorer-range">(7.35-7.45)</span>
-              </div>
-
-              <!-- pCO2 -->
-              <div class="explorer-item" data-param="pco2">
-                <div class="explorer-item-header">
-                  <span class="explorer-label">pCO₂</span>
-                  <button class="lock-btn locked" data-param="pco2" title="Click to unlock">
-                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 019.9-1"/>
-                    </svg>
-                  </button>
-                </div>
-                <input type="number" class="explorer-input" data-param="pco2" value="40" step="1" min="12" max="120" readonly>
-                <span class="explorer-range">mmHg (35-45)</span>
-              </div>
-
-              <!-- pO2 -->
-              <div class="explorer-item" data-param="po2">
-                <div class="explorer-item-header">
-                  <span class="explorer-label">pO₂</span>
-                  <button class="lock-btn locked" data-param="po2" title="Click to unlock">
-                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 019.9-1"/>
-                    </svg>
-                  </button>
-                </div>
-                <input type="number" class="explorer-input" data-param="po2" value="95" step="1" min="30" max="600" readonly>
-                <span class="explorer-range">mmHg (80-100)</span>
-              </div>
-
-              <!-- HCO3 -->
-              <div class="explorer-item" data-param="hco3">
-                <div class="explorer-item-header">
-                  <span class="explorer-label">HCO₃⁻</span>
-                  <button class="lock-btn locked" data-param="hco3" title="Click to unlock">
-                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 019.9-1"/>
-                    </svg>
-                  </button>
-                </div>
-                <input type="number" class="explorer-input" data-param="hco3" value="24" step="1" min="4" max="50" readonly>
-                <span class="explorer-range">mEq/L (22-26)</span>
-              </div>
-
-              <!-- SaO2 -->
-              <div class="explorer-item" data-param="sao2">
-                <div class="explorer-item-header">
-                  <span class="explorer-label">SaO₂</span>
-                  <button class="lock-btn locked" data-param="sao2" title="Click to unlock">
-                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 019.9-1"/>
-                    </svg>
-                  </button>
-                </div>
-                <input type="number" class="explorer-input" data-param="sao2" value="98" step="1" min="0" max="100" readonly>
-                <span class="explorer-range">% (95-100)</span>
-              </div>
-
+            <h3>Inspired Oxygen Fraction</h3>
+            <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">
+              Adjust the FiO₂ to see how it affects oxygenation parameters
+            </p>
+            <div class="explorer-grid" style="max-width: 400px;">
               <!-- FiO2 -->
-              <div class="explorer-item" data-param="fio2">
+              <div class="explorer-item unlocked" data-param="fio2">
                 <div class="explorer-item-header">
                   <span class="explorer-label">FiO₂</span>
-                  <button class="lock-btn locked" data-param="fio2" title="Click to unlock">
-                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 019.9-1"/>
-                    </svg>
-                  </button>
                 </div>
-                <input type="number" class="explorer-input" data-param="fio2" value="21" step="1" min="21" max="100" readonly>
+                <input type="number" class="explorer-input" data-param="fio2" value="21" step="1" min="21" max="100">
                 <span class="explorer-range">% (21-100)</span>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <!-- Electrolytes -->
+      <!-- Electrolytes Panel -->
+      <section class="panel explorer-panel">
+        <div class="panel-header">
+          <h2>Electrolytes & Metabolic</h2>
+        </div>
+        
+        <div class="panel-content">
           <div class="explorer-section">
-            <h3>Electrolytes & Metabolic</h3>
+            <h3>Serum Electrolytes</h3>
             <div class="explorer-grid">
               <!-- Sodium -->
               <div class="explorer-item" data-param="sodium">
@@ -346,10 +243,89 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <!-- Calculated Values (Read-only) -->
+      <!-- Blood Gas Values Panel -->
+      <section class="panel explorer-panel">
+        <div class="panel-header">
+          <h2>Measured Blood Gas Values</h2>
+          <div class="result-actions">
+            <button class="action-btn" id="copyExplorerBtn" title="Copy to Clipboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="panel-content">
+          <!-- ABG Values -->
+          <div class="explorer-section">
+            <h3>Arterial Blood Gas</h3>
+            <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">
+              These values are calculated based on FiO₂ and electrolytes
+            </p>
+            <div class="explorer-grid">
+              <!-- pH -->
+              <div class="explorer-item readonly" data-param="ph">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">pH</span>
+                </div>
+                <input type="number" class="explorer-input" data-param="ph" value="7.40" step="0.01" min="6.8" max="7.8" readonly>
+                <span class="explorer-range">(7.35-7.45)</span>
+              </div>
+
+              <!-- pCO2 -->
+              <div class="explorer-item readonly" data-param="pco2">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">pCO₂</span>
+                </div>
+                <input type="number" class="explorer-input" data-param="pco2" value="40" step="1" min="12" max="120" readonly>
+                <span class="explorer-range">mmHg (35-45)</span>
+              </div>
+
+              <!-- pO2 -->
+              <div class="explorer-item readonly" data-param="po2">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">pO₂</span>
+                </div>
+                <input type="number" class="explorer-input" data-param="po2" value="95" step="1" min="30" max="600" readonly>
+                <span class="explorer-range">mmHg (80-100)</span>
+              </div>
+
+              <!-- HCO3 -->
+              <div class="explorer-item readonly" data-param="hco3">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">HCO₃⁻</span>
+                </div>
+                <input type="number" class="explorer-input" data-param="hco3" value="24" step="1" min="4" max="50" readonly>
+                <span class="explorer-range">mEq/L (22-26)</span>
+              </div>
+
+              <!-- SaO2 -->
+              <div class="explorer-item readonly" data-param="sao2">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">SaO₂</span>
+                </div>
+                <input type="number" class="explorer-input" data-param="sao2" value="98" step="1" min="0" max="100" readonly>
+                <span class="explorer-range">% (95-100)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Calculated Values Panel -->
+      <section class="panel explorer-panel">
+        <div class="panel-header">
+          <h2>Calculated Values</h2>
+        </div>
+        
+        <div class="panel-content">
           <div class="explorer-section calculated-section">
-            <h3>Calculated Values (Read-only)</h3>
+            <h3>Derived Parameters</h3>
             <div class="calculated-grid">
               <div class="calculated-item">
                 <span class="calculated-label">Base Excess</span>

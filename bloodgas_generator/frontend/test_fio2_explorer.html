@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FiO2 Explorer Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .test-container { max-width: 800px; margin: 0 auto; }
+    .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+    .value { font-weight: bold; color: #0066cc; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>FiO2 to PaO2 Calculation Test</h1>
+    
+    <div class="test-section">
+      <h2>Input</h2>
+      <label>FiO2 (%): <input type="number" id="fio2Input" value="21" min="21" max="100" step="1"></label>
+      <button onclick="testCalculation()">Calculate</button>
+    </div>
+    
+    <div class="test-section">
+      <h2>Results</h2>
+      <div class="test-result">
+        <strong>FiO2:</strong> <span class="value" id="resultFio2">-</span>%
+      </div>
+      <div class="test-result">
+        <strong>Alveolar PO2 (PAO2):</strong> <span class="value" id="resultPAO2">-</span> mmHg
+      </div>
+      <div class="test-result">
+        <strong>A-a Gradient:</strong> <span class="value" id="resultAAGrad">-</span> mmHg
+      </div>
+      <div class="test-result">
+        <strong>Arterial PO2 (PaO2):</strong> <span class="value" id="resultPaO2">-</span> mmHg
+      </div>
+      <div class="test-result">
+        <strong>SaO2:</strong> <span class="value" id="resultSaO2">-</span>%
+      </div>
+      <div class="test-result">
+        <strong>P/F Ratio:</strong> <span class="value" id="resultPF">-</span>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>Quick Tests</h2>
+      <button onclick="testFio2(21)">Room Air (21%)</button>
+      <button onclick="testFio2(40)">40%</button>
+      <button onclick="testFio2(60)">60%</button>
+      <button onclick="testFio2(100)">100%</button>
+    </div>
+  </div>
+  
+  <script>
+    function calculateAlveolarPO2(fio2Percent, pco2) {
+      const fio2 = fio2Percent / 100;
+      const atmosphericPressure = 760; // mmHg at sea level
+      const waterVaporPressure = 47; // mmHg at 37°C
+      const respiratoryQuotient = 0.8;
+      
+      const pio2 = fio2 * (atmosphericPressure - waterVaporPressure);
+      const pao2 = pio2 - (pco2 / respiratoryQuotient);
+      
+      return pao2;
+    }
+    
+    function calculateSaO2FromPO2(po2, ph) {
+      const p50 = 27 + (7.4 - ph) * 5;
+      const hillCoefficient = 2.7;
+      
+      const sao2 = 100 * Math.pow(po2, hillCoefficient) / 
+                   (Math.pow(p50, hillCoefficient) + Math.pow(po2, hillCoefficient));
+      
+      return Math.max(0, Math.min(100, sao2));
+    }
+    
+    function testFio2(value) {
+      document.getElementById('fio2Input').value = value;
+      testCalculation();
+    }
+    
+    function testCalculation() {
+      const fio2 = parseFloat(document.getElementById('fio2Input').value);
+      const pco2 = 40; // Normal pCO2
+      const ph = 7.40; // Normal pH
+      const age = 40; // Assumed age
+      
+      // Calculate PAO2
+      const pao2 = calculateAlveolarPO2(fio2, pco2);
+      
+      // Calculate A-a gradient (age-dependent)
+      const aaGradient = (age / 4) + 4;
+      
+      // Calculate PaO2
+      const pao2Arterial = pao2 - aaGradient;
+      
+      // Calculate SaO2
+      const sao2 = calculateSaO2FromPO2(pao2Arterial, ph);
+      
+      // Calculate P/F ratio
+      const pfRatio = pao2Arterial / (fio2 / 100);
+      
+      // Display results
+      document.getElementById('resultFio2').textContent = fio2;
+      document.getElementById('resultPAO2').textContent = pao2.toFixed(1);
+      document.getElementById('resultAAGrad').textContent = aaGradient.toFixed(1);
+      document.getElementById('resultPaO2').textContent = pao2Arterial.toFixed(1);
+      document.getElementById('resultSaO2').textContent = sao2.toFixed(1);
+      document.getElementById('resultPF').textContent = pfRatio.toFixed(0);
+    }
+    
+    // Run initial calculation
+    testCalculation();
+  </script>
+</body>
+</html>
