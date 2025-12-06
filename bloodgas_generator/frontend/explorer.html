@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Gas Explorer | Interactive ABG Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app explorer-app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <a href="index.html" style="display: flex; align-items: center; gap: 16px; color: inherit; text-decoration: none;">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 16h12M16 10v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Blood Gas Explorer</span>
+          </a>
+        </div>
+        <p class="tagline">Interactive exploration of arterial blood gas values</p>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="explorer-main">
+      <!-- Instructions Panel -->
+      <section class="panel instructions-panel">
+        <div class="panel-header">
+          <h2>How to Use</h2>
+        </div>
+        <div class="panel-content">
+          <div class="instructions">
+            <div class="instruction-item">
+              <div class="instruction-number">1</div>
+              <div class="instruction-text">
+                <strong>Start with Normal Values</strong>
+                <p>The explorer begins with a normal healthy blood gas result</p>
+              </div>
+            </div>
+            <div class="instruction-item">
+              <div class="instruction-number">2</div>
+              <div class="instruction-text">
+                <strong>Unlock Parameters</strong>
+                <p>Click the lock icon next to any value to unlock it for editing</p>
+              </div>
+            </div>
+            <div class="instruction-item">
+              <div class="instruction-number">3</div>
+              <div class="instruction-text">
+                <strong>Adjust Values</strong>
+                <p>Change unlocked values and watch other parameters update in real-time</p>
+              </div>
+            </div>
+            <div class="instruction-item">
+              <div class="instruction-number">4</div>
+              <div class="instruction-text">
+                <strong>Explore Relationships</strong>
+                <p>See how physiological relationships affect the complete blood gas</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="explorer-actions">
+            <button class="action-btn-primary" id="resetBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+              </svg>
+              Reset to Normal
+            </button>
+            <button class="action-btn-secondary" id="lockAllBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4"/>
+              </svg>
+              Lock All
+            </button>
+            <button class="action-btn-secondary" id="unlockAllBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 019.9-1"/>
+              </svg>
+              Unlock All
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Blood Gas Values Panel -->
+      <section class="panel explorer-panel">
+        <div class="panel-header">
+          <h2>Blood Gas Values</h2>
+          <div class="result-actions">
+            <button class="action-btn" id="copyExplorerBtn" title="Copy to Clipboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="panel-content">
+          <!-- ABG Values -->
+          <div class="explorer-section">
+            <h3>Arterial Blood Gas</h3>
+            <div class="explorer-grid">
+              <!-- pH -->
+              <div class="explorer-item" data-param="ph">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">pH</span>
+                  <button class="lock-btn locked" data-param="ph" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="ph" value="7.40" step="0.01" min="6.8" max="7.8" readonly>
+                <span class="explorer-range">(7.35-7.45)</span>
+              </div>
+
+              <!-- pCO2 -->
+              <div class="explorer-item" data-param="pco2">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">pCO₂</span>
+                  <button class="lock-btn locked" data-param="pco2" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="pco2" value="40" step="1" min="12" max="120" readonly>
+                <span class="explorer-range">mmHg (35-45)</span>
+              </div>
+
+              <!-- pO2 -->
+              <div class="explorer-item" data-param="po2">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">pO₂</span>
+                  <button class="lock-btn locked" data-param="po2" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="po2" value="95" step="1" min="30" max="600" readonly>
+                <span class="explorer-range">mmHg (80-100)</span>
+              </div>
+
+              <!-- HCO3 -->
+              <div class="explorer-item" data-param="hco3">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">HCO₃⁻</span>
+                  <button class="lock-btn locked" data-param="hco3" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="hco3" value="24" step="1" min="4" max="50" readonly>
+                <span class="explorer-range">mEq/L (22-26)</span>
+              </div>
+
+              <!-- SaO2 -->
+              <div class="explorer-item" data-param="sao2">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">SaO₂</span>
+                  <button class="lock-btn locked" data-param="sao2" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="sao2" value="98" step="1" min="0" max="100" readonly>
+                <span class="explorer-range">% (95-100)</span>
+              </div>
+
+              <!-- FiO2 -->
+              <div class="explorer-item" data-param="fio2">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">FiO₂</span>
+                  <button class="lock-btn locked" data-param="fio2" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="fio2" value="21" step="1" min="21" max="100" readonly>
+                <span class="explorer-range">% (21-100)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Electrolytes -->
+          <div class="explorer-section">
+            <h3>Electrolytes & Metabolic</h3>
+            <div class="explorer-grid">
+              <!-- Sodium -->
+              <div class="explorer-item" data-param="sodium">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">Na⁺</span>
+                  <button class="lock-btn locked" data-param="sodium" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="sodium" value="140" step="1" min="115" max="165" readonly>
+                <span class="explorer-range">mEq/L (136-145)</span>
+              </div>
+
+              <!-- Potassium -->
+              <div class="explorer-item" data-param="potassium">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">K⁺</span>
+                  <button class="lock-btn locked" data-param="potassium" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="potassium" value="4.0" step="0.1" min="2.0" max="7.0" readonly>
+                <span class="explorer-range">mEq/L (3.5-5.0)</span>
+              </div>
+
+              <!-- Chloride -->
+              <div class="explorer-item" data-param="chloride">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">Cl⁻</span>
+                  <button class="lock-btn locked" data-param="chloride" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="chloride" value="106" step="1" min="85" max="120" readonly>
+                <span class="explorer-range">mEq/L (98-106)</span>
+              </div>
+
+              <!-- Glucose -->
+              <div class="explorer-item" data-param="glucose">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">Glucose</span>
+                  <button class="lock-btn locked" data-param="glucose" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="glucose" value="90" step="1" min="20" max="1000" readonly>
+                <span class="explorer-range">mg/dL (70-100)</span>
+              </div>
+
+              <!-- Lactate -->
+              <div class="explorer-item" data-param="lactate">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">Lactate</span>
+                  <button class="lock-btn locked" data-param="lactate" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="lactate" value="1.0" step="0.1" min="0" max="20" readonly>
+                <span class="explorer-range">mmol/L (0.5-2.0)</span>
+              </div>
+
+              <!-- Albumin -->
+              <div class="explorer-item" data-param="albumin">
+                <div class="explorer-item-header">
+                  <span class="explorer-label">Albumin</span>
+                  <button class="lock-btn locked" data-param="albumin" title="Click to unlock">
+                    <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <svg class="unlock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 019.9-1"/>
+                    </svg>
+                  </button>
+                </div>
+                <input type="number" class="explorer-input" data-param="albumin" value="4.0" step="0.1" min="1.5" max="6.0" readonly>
+                <span class="explorer-range">g/dL (3.5-5.0)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculated Values (Read-only) -->
+          <div class="explorer-section calculated-section">
+            <h3>Calculated Values (Read-only)</h3>
+            <div class="calculated-grid">
+              <div class="calculated-item">
+                <span class="calculated-label">Base Excess</span>
+                <span class="calculated-value" id="calc-base-excess">0</span>
+                <span class="calculated-unit">mEq/L</span>
+              </div>
+              <div class="calculated-item">
+                <span class="calculated-label">Anion Gap</span>
+                <span class="calculated-value" id="calc-anion-gap">10</span>
+                <span class="calculated-unit">mEq/L</span>
+              </div>
+              <div class="calculated-item">
+                <span class="calculated-label">P/F Ratio</span>
+                <span class="calculated-value" id="calc-pf-ratio">452</span>
+                <span class="calculated-unit"></span>
+              </div>
+              <div class="calculated-item">
+                <span class="calculated-label">A-a Gradient</span>
+                <span class="calculated-value" id="calc-aa-gradient">10</span>
+                <span class="calculated-unit">mmHg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Blood Gas Explorer • For educational purposes only • Not for clinical use</p>
+    </footer>
+  </div>
+
+  <script src="explorer.js"></script>
+</body>
+</html>

@@ -17,6 +17,20 @@ A physiologically-accurate blood gas value generator for medical education. Gene
 
 Open `frontend/index.html` in your browser - no server required!
 
+The web interface includes two powerful tools:
+
+1. **Blood Gas Generator** (`generator.html`)
+   - Generate complete blood gas results from clinical scenarios
+   - Select from 40+ conditions with adjustable severity
+   - View step-by-step analysis and interpretation
+   - Perfect for learning ABG interpretation
+
+2. **Blood Gas Explorer** (`explorer.html`)
+   - Interactive exploration of blood gas values
+   - Start with normal values, unlock any parameter
+   - Change values and watch real-time recalculation
+   - Understand physiological relationships hands-on
+
 ### Python
 
 ```python
@@ -158,9 +172,12 @@ bloodgas_generator/
 │   │   └── generator.ts
 │   └── package.json
 ├── frontend/              # Web interface
-│   ├── index.html
+│   ├── index.html         # Landing page
+│   ├── generator.html     # Blood Gas Generator tool
+│   ├── explorer.html      # Blood Gas Explorer tool
 │   ├── styles.css
-│   ├── app.js
+│   ├── app.js            # Generator logic
+│   ├── explorer.js       # Explorer logic
 │   └── bloodgas.bundle.js
 └── shared/
     └── schemas/           # JSON schemas
