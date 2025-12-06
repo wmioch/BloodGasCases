@@ -193,15 +193,12 @@ function recalculateUnlockedValues() {
   v.hco3 = calculateHCO3FromPHandPCO2(v.ph, v.pco2);
   
   // ===== OXYGENATION CALCULATIONS =====
-  // FiO2 is user-controlled, calculate PaO2 from it
-  if (locked.has('fio2')) {
-    // FiO2 is being controlled by user
-    const alveolarPo2 = calculateAlveolarPO2(v.fio2, v.pco2);
-    // Assume a reasonable A-a gradient (age-dependent, age 40)
-    const aaGradient = (40 / 4) + 4; // ~14 mmHg
-    v.po2 = alveolarPo2 - aaGradient;
-    v.po2 = Math.max(30, Math.min(600, v.po2)); // Clamp to physiological range
-  }
+  // FiO2 drives PaO2 regardless of its lock state so measured values update
+  const alveolarPo2 = calculateAlveolarPO2(v.fio2, v.pco2);
+  // Assume a reasonable A-a gradient (age-dependent, age 40)
+  const aaGradient = (40 / 4) + 4; // ~14 mmHg
+  v.po2 = alveolarPo2 - aaGradient;
+  v.po2 = Math.max(30, Math.min(600, v.po2)); // Clamp to physiological range
   
   // Always calculate SaO2 from pO2
   v.sao2 = calculateSaO2FromPO2(v.po2, v.ph);
