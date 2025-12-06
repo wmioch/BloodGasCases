@@ -11,7 +11,11 @@
 
 const explorerState = {
   // Locked parameters (user has control)
-  locked: new Set(),
+  // FiO2 is unlocked by default, others are locked
+  locked: new Set(['fio2']),
+  
+  // Parameters that should never be locked/unlocked (measured values)
+  readonly: new Set(['ph', 'pco2', 'po2', 'hco3', 'sao2']),
   
   // Current values
   values: {
@@ -38,16 +42,35 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeLockButtons();
   initializeInputs();
   initializeActionButtons();
+  initializeDefaultStates();
+  recalculateUnlockedValues(); // Calculate initial values based on FiO2
   updateDisplay();
   updateCalculatedValues();
 });
+
+function initializeDefaultStates() {
+  // FiO2 is unlocked and editable by default
+  unlock('fio2');
+  
+  // Measured blood gas values are always readonly (no lock button)
+  // These are calculated from FiO2 and electrolytes
+  explorerState.readonly.forEach(param => {
+    const input = document.querySelector(`.explorer-input[data-param="${param}"]`);
+    if (input) {
+      input.setAttribute('readonly', true);
+    }
+  });
+}
 
 function initializeLockButtons() {
   document.querySelectorAll('.lock-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const param = btn.dataset.param;
-      toggleLock(param);
+      // Don't allow toggling readonly parameters
+      if (!explorerState.readonly.has(param)) {
+        toggleLock(param);
+      }
     });
   });
 }
@@ -100,11 +123,19 @@ function unlock(param) {
 }
 
 function lockAll() {
-  Object.keys(explorerState.values).forEach(param => lock(param));
+  Object.keys(explorerState.values).forEach(param => {
+    if (!explorerState.readonly.has(param)) {
+      lock(param);
+    }
+  });
 }
 
 function unlockAll() {
-  Object.keys(explorerState.values).forEach(param => unlock(param));
+  Object.keys(explorerState.values).forEach(param => {
+    if (!explorerState.readonly.has(param)) {
+      unlock(param);
+    }
+  });
 }
 
 function updateLockButton(param, isLocked) {
@@ -150,101 +181,47 @@ function recalculateUnlockedValues() {
   const v = explorerState.values;
   const locked = explorerState.locked;
   
-  // ===== ACID-BASE CALCULATIONS =====
-  // We need at least 2 of {pH, pCO2, HCO3} locked to calculate the third
+  // ===== SIMPLIFIED LOGIC FOR INITIAL IMPLEMENTATION =====
+  // For now, we keep acid-base at normal values and focus on FiO2 -> PaO2
+  // Later we can add more sophisticated interactions
   
-  // If pH and pCO2 are locked, calculate HCO3
-  if (locked.has('ph') && locked.has('pco2') && !locked.has('hco3')) {
-    v.hco3 = calculateHCO3FromPHandPCO2(v.ph, v.pco2);
-  }
-  // If pH and HCO3 are locked, calculate pCO2
-  else if (locked.has('ph') && locked.has('hco3') && !locked.has('pco2')) {
-    v.pco2 = calculatePCO2FromPHandHCO3(v.ph, v.hco3);
-  }
-  // If pCO2 and HCO3 are locked, calculate pH
-  else if (locked.has('pco2') && locked.has('hco3') && !locked.has('ph')) {
-    v.ph = calculatePHFromHCO3AndPCO2(v.hco3, v.pco2);
-  }
-  // If only one is locked, we need to maintain some defaults or use heuristics
-  else if (!locked.has('ph') && !locked.has('pco2') && !locked.has('hco3')) {
-    // All unlocked - maintain current relationships
-    // This shouldn't happen in normal use
-  }
-  // If two are unlocked and one is locked, we have underdetermined system
-  // Keep the locked value and maintain one relationship
-  else if (locked.has('ph') && !locked.has('pco2') && !locked.has('hco3')) {
-    // pH locked, maintain normal pCO2 and calculate HCO3
-    if (!locked.has('pco2')) {
-      // Keep pCO2 at reasonable value, calculate HCO3
-      v.hco3 = calculateHCO3FromPHandPCO2(v.ph, v.pco2);
-    }
-  }
-  else if (locked.has('pco2') && !locked.has('ph') && !locked.has('hco3')) {
-    // pCO2 locked, maintain normal HCO3 and calculate pH
-    if (!locked.has('hco3')) {
-      v.ph = calculatePHFromHCO3AndPCO2(v.hco3, v.pco2);
-    }
-  }
-  else if (locked.has('hco3') && !locked.has('ph') && !locked.has('pco2')) {
-    // HCO3 locked, maintain normal pCO2 and calculate pH
-    if (!locked.has('pco2')) {
-      v.ph = calculatePHFromHCO3AndPCO2(v.hco3, v.pco2);
-    }
-  }
+  // ===== ACID-BASE CALCULATIONS =====
+  // Maintain normal pH and pCO2 for now
+  // Calculate HCO3 from Henderson-Hasselbalch
+  v.ph = 7.40;
+  v.pco2 = 40;
+  v.hco3 = calculateHCO3FromPHandPCO2(v.ph, v.pco2);
   
   // ===== OXYGENATION CALCULATIONS =====
-  // Priority: SaO2 -> pO2 relationship takes precedence over FiO2 -> pO2
-  
-  // If SaO2 is locked (user-controlled) but pO2 isn't, calculate pO2 from SaO2
-  if (locked.has('sao2') && !locked.has('po2')) {
-    v.po2 = calculatePO2FromSaO2(v.sao2, v.ph);
-  }
-  // Else if FiO2 is locked (user-controlled) or pCO2 is locked, and pO2 is NOT locked, 
-  // recalculate pO2 using alveolar gas equation
-  else if (!locked.has('po2') && (locked.has('fio2') || locked.has('pco2'))) {
+  // FiO2 is user-controlled, calculate PaO2 from it
+  if (locked.has('fio2')) {
+    // FiO2 is being controlled by user
     const alveolarPo2 = calculateAlveolarPO2(v.fio2, v.pco2);
-    // Assume a reasonable A-a gradient (age-dependent)
-    const aaGradient = (40 / 4) + 4; // Assume age 40, normal gradient
+    // Assume a reasonable A-a gradient (age-dependent, age 40)
+    const aaGradient = (40 / 4) + 4; // ~14 mmHg
     v.po2 = alveolarPo2 - aaGradient;
     v.po2 = Math.max(30, Math.min(600, v.po2)); // Clamp to physiological range
   }
   
-  // Always recalculate SaO2 from pO2 if user isn't controlling SaO2
-  if (!locked.has('sao2')) {
-    v.sao2 = calculateSaO2FromPO2(v.po2, v.ph);
-  }
+  // Always calculate SaO2 from pO2
+  v.sao2 = calculateSaO2FromPO2(v.po2, v.ph);
   
   // ===== ELECTROLYTE RELATIONSHIPS =====
-  // Maintain anion gap relationship: Na - (Cl + HCO3) = AG
-  // If we have 3 locked, calculate the 4th
-  const electrolyteParams = ['sodium', 'chloride', 'hco3'];
-  const lockedElectrolytes = electrolyteParams.filter(p => locked.has(p));
+  // If electrolytes are locked (user-controlled), we respect their values
+  // Otherwise maintain normal relationships
   
-  if (lockedElectrolytes.length === 3) {
-    // All three locked - can't change anything
-  } else if (lockedElectrolytes.length === 2) {
-    // Two locked - maintain reasonable anion gap (10-12)
-    const targetAG = 10;
-    
-    if (locked.has('sodium') && locked.has('hco3') && !locked.has('chloride')) {
-      v.chloride = v.sodium - v.hco3 - targetAG;
-      v.chloride = Math.max(85, Math.min(120, v.chloride));
-    }
-    else if (locked.has('sodium') && locked.has('chloride') && !locked.has('hco3')) {
-      // HCO3 should be calculated from pH/pCO2 anyway
-      // But if we need to maintain AG: HCO3 = Na - Cl - AG
-      const calculatedHCO3 = v.sodium - v.chloride - targetAG;
-      if (!locked.has('hco3')) {
-        // Only update if it's reasonable
-        if (calculatedHCO3 >= 4 && calculatedHCO3 <= 50) {
-          v.hco3 = calculatedHCO3;
-        }
-      }
-    }
-    else if (locked.has('chloride') && locked.has('hco3') && !locked.has('sodium')) {
-      v.sodium = v.chloride + v.hco3 + targetAG;
-      v.sodium = Math.max(115, Math.min(165, v.sodium));
-    }
+  // Maintain anion gap if electrolytes are being modified
+  const targetAG = 10;
+  
+  // If sodium is locked but chloride isn't, adjust chloride
+  if (locked.has('sodium') && !locked.has('chloride')) {
+    v.chloride = v.sodium - v.hco3 - targetAG;
+    v.chloride = Math.max(85, Math.min(120, v.chloride));
+  }
+  // If chloride is locked but sodium isn't, adjust sodium
+  else if (locked.has('chloride') && !locked.has('sodium')) {
+    v.sodium = v.chloride + v.hco3 + targetAG;
+    v.sodium = Math.max(115, Math.min(165, v.sodium));
   }
   
   // Clamp all values to physiological ranges
@@ -490,11 +467,24 @@ function resetToNormal() {
     albumin: 4.0,
   };
   
-  // Lock all values initially
+  // Reset lock states: only FiO2 is unlocked
   explorerState.locked.clear();
+  explorerState.locked.add('fio2'); // FiO2 is unlocked (user-controlled)
+  
+  // Update UI for all parameters
   Object.keys(explorerState.values).forEach(param => {
-    updateLockButton(param, false);
-    updateInputReadonly(param, true);
+    if (explorerState.readonly.has(param)) {
+      // Readonly parameters - no lock button, always readonly
+      updateInputReadonly(param, true);
+    } else if (param === 'fio2') {
+      // FiO2 is unlocked by default
+      updateLockButton(param, false);
+      updateInputReadonly(param, false);
+    } else {
+      // Other parameters start locked
+      updateLockButton(param, true);
+      updateInputReadonly(param, true);
+    }
   });
   
   updateDisplay();

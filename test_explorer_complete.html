@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blood Gas Explorer - Complete Test</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .section { 
+      margin: 20px 0; 
+      padding: 20px; 
+      border: 2px solid #333; 
+      border-radius: 8px; 
+      background: #f9f9f9;
+    }
+    .controls { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 15px; 
+      margin: 20px 0; 
+    }
+    .control-item {
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .control-item label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #666;
+    }
+    .control-item input {
+      width: 100%;
+      padding: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      border: 2px solid #58a6ff;
+      border-radius: 4px;
+      background: rgba(88, 166, 255, 0.05);
+    }
+    .readonly {
+      opacity: 0.8;
+      background: #f5f5f5;
+    }
+    .readonly input {
+      background: #f5f5f5;
+      border-color: #ccc;
+      cursor: not-allowed;
+    }
+    .value-display {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .value-item {
+      padding: 15px;
+      background: white;
+      border-radius: 5px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    .value-label {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    .value-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0066cc;
+    }
+    .value-unit {
+      font-size: 12px;
+      color: #999;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+      border-bottom: 2px solid #58a6ff;
+      padding-bottom: 10px;
+    }
+    .status {
+      padding: 10px;
+      background: #e7f3ff;
+      border-left: 4px solid #58a6ff;
+      margin: 15px 0;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <h1>🩺 Blood Gas Explorer - Functional Test</h1>
+  
+  <div class="section">
+    <h2>1. Oxygen Therapy (User Controllable)</h2>
+    <div class="controls">
+      <div class="control-item">
+        <label>FiO₂ (%)</label>
+        <input type="number" id="fio2" value="21" min="21" max="100" step="1" oninput="recalculate()">
+      </div>
+    </div>
+    <div class="status">
+      ✓ FiO2 is unlocked and editable - adjust it to see blood gas values change
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>2. Measured Blood Gas Values (Calculated - Read Only)</h2>
+    <div class="value-display">
+      <div class="value-item">
+        <div class="value-label">pH</div>
+        <div class="value-number" id="ph">-</div>
+        <div class="value-unit">(7.35-7.45)</div>
+      </div>
+      <div class="value-item">
+        <div class="value-label">pCO₂</div>
+        <div class="value-number" id="pco2">-</div>
+        <div class="value-unit">mmHg (35-45)</div>
+      </div>
+      <div class="value-item">
+        <div class="value-label">pO₂</div>
+        <div class="value-number" id="po2">-</div>
+        <div class="value-unit">mmHg (80-100)</div>
+      </div>
+      <div class="value-item">
+        <div class="value-label">HCO₃⁻</div>
+        <div class="value-number" id="hco3">-</div>
+        <div class="value-unit">mEq/L (22-26)</div>
+      </div>
+      <div class="value-item">
+        <div class="value-label">SaO₂</div>
+        <div class="value-number" id="sao2">-</div>
+        <div class="value-unit">% (95-100)</div>
+      </div>
+    </div>
+    <div class="status">
+      ✓ These values are automatically calculated based on FiO2
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>3. Calculated Parameters</h2>
+    <div class="value-display">
+      <div class="value-item">
+        <div class="value-label">P/F Ratio</div>
+        <div class="value-number" id="pf">-</div>
+        <div class="value-unit">(>300 normal)</div>
+      </div>
+      <div class="value-item">
+        <div class="value-label">A-a Gradient</div>
+        <div class="value-number" id="aa">-</div>
+        <div class="value-unit">mmHg</div>
+      </div>
+      <div class="value-item">
+        <div class="value-label">Base Excess</div>
+        <div class="value-number" id="be">-</div>
+        <div class="value-unit">mEq/L</div>
+      </div>
+    </div>
+    <div class="status">
+      ✓ Derived from measured values
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>Quick Tests</h2>
+    <button onclick="setFio2(21)" style="padding: 10px 20px; margin: 5px; cursor: pointer; font-size: 16px;">Room Air (21%)</button>
+    <button onclick="setFio2(40)" style="padding: 10px 20px; margin: 5px; cursor: pointer; font-size: 16px;">40% O₂</button>
+    <button onclick="setFio2(60)" style="padding: 10px 20px; margin: 5px; cursor: pointer; font-size: 16px;">60% O₂</button>
+    <button onclick="setFio2(100)" style="padding: 10px 20px; margin: 5px; cursor: pointer; font-size: 16px;">100% O₂</button>
+  </div>
+  
+  <script>
+    // Physiological calculation functions
+    function calculateHCO3FromPHandPCO2(ph, pco2) {
+      const hco3 = 0.03 * pco2 * Math.pow(10, ph - 6.1);
+      return Math.max(4, Math.min(50, hco3));
+    }
+    
+    function calculateAlveolarPO2(fio2Percent, pco2) {
+      const fio2 = fio2Percent / 100;
+      const atmosphericPressure = 760;
+      const waterVaporPressure = 47;
+      const respiratoryQuotient = 0.8;
+      
+      const pio2 = fio2 * (atmosphericPressure - waterVaporPressure);
+      const pao2 = pio2 - (pco2 / respiratoryQuotient);
+      
+      return pao2;
+    }
+    
+    function calculateSaO2FromPO2(po2, ph) {
+      const p50 = 27 + (7.4 - ph) * 5;
+      const hillCoefficient = 2.7;
+      
+      const sao2 = 100 * Math.pow(po2, hillCoefficient) / 
+                   (Math.pow(p50, hillCoefficient) + Math.pow(po2, hillCoefficient));
+      
+      return Math.max(0, Math.min(100, sao2));
+    }
+    
+    function calculateBaseExcess(ph, hco3) {
+      const hemoglobin = 14;
+      return (hco3 - 24.4) + (2.3 * hemoglobin + 7.7) * (ph - 7.4);
+    }
+    
+    function recalculate() {
+      // Get FiO2 input
+      const fio2 = parseFloat(document.getElementById('fio2').value);
+      
+      // Fixed values for now
+      const ph = 7.40;
+      const pco2 = 40;
+      
+      // Calculate HCO3
+      const hco3 = calculateHCO3FromPHandPCO2(ph, pco2);
+      
+      // Calculate PaO2 from FiO2
+      const alveolarPo2 = calculateAlveolarPO2(fio2, pco2);
+      const aaGradient = (40 / 4) + 4; // Age 40
+      let po2 = alveolarPo2 - aaGradient;
+      po2 = Math.max(30, Math.min(600, po2));
+      
+      // Calculate SaO2
+      const sao2 = calculateSaO2FromPO2(po2, ph);
+      
+      // Calculate derived values
+      const pfRatio = po2 / (fio2 / 100);
+      const baseExcess = calculateBaseExcess(ph, hco3);
+      
+      // Update display
+      document.getElementById('ph').textContent = ph.toFixed(2);
+      document.getElementById('pco2').textContent = Math.round(pco2);
+      document.getElementById('po2').textContent = Math.round(po2);
+      document.getElementById('hco3').textContent = Math.round(hco3);
+      document.getElementById('sao2').textContent = Math.round(sao2);
+      document.getElementById('pf').textContent = Math.round(pfRatio);
+      document.getElementById('aa').textContent = aaGradient.toFixed(0);
+      document.getElementById('be').textContent = baseExcess.toFixed(1);
+      
+      // Color code P/F ratio
+      const pfEl = document.getElementById('pf').parentElement;
+      if (pfRatio < 300) {
+        pfEl.style.background = 'rgba(248, 81, 73, 0.1)';
+      } else {
+        pfEl.style.background = 'white';
+      }
+    }
+    
+    function setFio2(value) {
+      document.getElementById('fio2').value = value;
+      recalculate();
+    }
+    
+    // Initial calculation
+    recalculate();
+  </script>
+</body>
+</html>
